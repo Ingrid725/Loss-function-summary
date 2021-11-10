@@ -14,7 +14,7 @@
     <br /> 相比于最小二乘的线性回归，HuberLoss降低了对离群点的惩罚程度，所以 HuberLoss 是一种常用的鲁棒的回归损失函数。
   <h2>2. 表达式</h2>
     <br />Huber Loss 定义如下:
-    <img scr='figures/Huber Loss.png'></img>  
+    <br /><img src = "figures/Huber Loss.png" width = "50%">
   <h2>3. 代码实现</h2>
     <br />Huber损失函数的Python代码
     <pre># huber 损失
