@@ -1,4 +1,8 @@
 # 分类损失函数
+<details>
+  <summary>Cross Entropy</summary>
+</details>
+
 ## Cross Entropy
 
 ## 
