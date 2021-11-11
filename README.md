@@ -29,8 +29,7 @@
               p = torch.exp(-logp)
               loss = (1 - p) ** self.gamma * logp
               loss = self.alpha*loss
-              return loss.mean()
-    </pre>
+              return loss.mean()</pre>
 </details>
 
 <details>
@@ -41,11 +40,25 @@
     <br />Hinge Loss 定义如下:
     <br /><img src = "figures/hinge_loss.png" width = "50%">
   <h2>3. 代码实现</h2>
-    <br />Focal损失函数的Python代码
+    <br />Hinge损失函数的Python代码
     <pre>
-       loss = max(0, 1-target*prediction)
-    </pre>
+       loss = max(0, 1-target*prediction)</pre>
 </details>
+
+<details>
+  <summary>Logistic Loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 用于二分类问题的损失函数
+  <h2>2. 表达式</h2>
+    <br />Logistic Loss 定义如下:
+    <br /><img src = "figures/Logistic_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />Logistic损失函数的Python代码
+    <pre>
+       loss = 1 / (1 + torch.exp(-x))</pre>
+</details>
+
+
 
 # 回归损失函数
 <details>
@@ -71,4 +84,39 @@ def huber(true, pred, delta):
   <summary>Verification loss(Re-ID)</summary>
   <h2>1. 损失函数介绍</h2>
   <h2>2. 表达式</h2>
+</details>
+  
+<details>
+  <summary>Triplet Loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 回归问题损失函数，用于人脸识别，学习人脸的embedding, 相似的人脸对应的embedding在特征空间内相近，以此距离作人脸识别
+  <h2>2. 表达式</h2>
+    <br />Logistic Loss 定义如下:
+    <br /> (a, p, n) a: anchor, p: positive sample, n: negetive sample
+    <br /><img src = "figures/Triplet_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />Triplet损失函数的Python代码
+    <pre>
+       triplet_loss = np.maximum(positive_dist - negative_dist + margin, 0.0)</pre>
+</details>
+  
+<details>
+  <summary>Contrastive Loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 对比学习的损失函数，使近似样本之间的距离越小越好。不近似样本之间的距离如果小于m，则通过互斥使其距离接近m。
+  <h2>2. 表达式</h2>
+    <br />Contrastive Loss 定义如下:
+    <br /><img src = "figures/contrastive_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />交叉损失函数的Python代码
+    <pre>
+    class ContrastiveLoss(torch.nn.Module):
+    def __init__(self, margin=2.0):
+        super(ContrastiveLoss, self).__init__()
+        self.margin = margin
+
+    def forward(self, output1, output2, label):
+        euclidean_distance = F.pairwise_distance(output1, output2)
+        loss_contrastive = torch.mean((1-label)*torch.pow(euclidean_distance, 2)+(label)*torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))     
+        return loss_contrastive</pre>
 </details>
