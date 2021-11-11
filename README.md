@@ -6,7 +6,7 @@
 </details>
 
 <details>
-  <summary>Cross Entropy</summary>
+  <summary>Focal Loss</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> Focal Loss是用于分类问题的带参损失函数, 当前object detection算法：
     <br /> 1. two-stage detector: Faster-RCNN为代表，需要region proposal的算法，由于RPN需要对object进行两次过滤(2-stage)，准确率较高但速度慢
@@ -14,7 +14,7 @@
     <br /> Focal loss 的目的是让one-stage在维持速度的前提下达到two-stage准确率。作者认为one-stage准确率不佳的核心原因：样本类别不均衡。Focal Loss采用调制因子来减少易分类样本的权重，从而使得模型在训练时更专注于难分类的样本。
   <h2>2. 表达式</h2>
     <br />focal Loss 定义如下:
-    <br /><img src = "figures/focal_oss.png" width = "50%">
+    <br /><img src = "figures/focal_loss.png" width = "50%">
   <h2>3. 代码实现</h2>
     <br />Focal损失函数的Python代码
     <pre>
