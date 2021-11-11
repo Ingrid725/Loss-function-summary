@@ -2,7 +2,53 @@
 <details>
   <summary>Cross Entropy</summary>
   <h2>1. 损失函数介绍</h2>
+    <br />交叉熵（Cross Entropy）是Shannon信息论中一个重要概念，主要用于度量两个概率分布间的差异性信息。
+    <br />交叉熵损失函数用于度量实际输出（概率）与期望输出（概率）的距离，也就是交叉熵的值越小，两个概率分布就越接近。
+    <br />交叉熵函数常用于分类(classification)。
   <h2>2. 表达式</h2>
+    <br />Cross Entropy Loss 定义如下:
+    <br /><img src = "figures/CELoss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />Cross Entropy Loss的Python代码
+    <pre>
+    
+    def cross_entropy(a, y):
+        return np.sum(np.nan_to_num(-y*np.log(a)-(1-y)*np.log(1-a)))
+
+    # tensorflow version
+    loss = tf.reduce_mean(-tf.reduce_sum(y_*tf.log(y), reduction_indices=[1]))
+
+    # numpy version
+    loss = np.mean(-np.sum(y_*np.log(y), axis=1))</pre>
+</details>
+
+<details>
+  <summary>L1/L2 loss</summary>
+  <h2>L1-norm loss function</h2>
+    <br /><img src = "figures/L1.png" width = "50%">
+  <h2>L2-norm loss function</h2>
+    <br /><img src = "figures/L2.png" width = "50%">
+  <h2>L1和L2 损失函数区别</h2>
+    <br />L2损失函数是最最常用的损失函数，在回归问题中，也就是我们耳熟能详的最小二乘法。并且在满足高斯马尔可夫条件的时候，可以证明使用L2损失函数所得的参数具有无偏性和有效性。
+    <br />但是，L1损失函数也有其自己的优点，下面我们对两个损失函数进行比较。
+    <br /><img src = "figures/L1L2.png" width = "50%"> 
+    <br />稳健性:
+    <br />L1损失函数稳健性强是它最大的优点。面对误差较大的观测，L1损失函数不容易受到它的影响。这是因为:L1损失函数增加的只是一个误差，而L2损失函数增加的是误差的平方。当误差较大时，使用L2损失函数，我们需要更大程度的调整模型以适应这个观测，所以L2损失函数没有L1损失函数那么稳定。
+    <br />那么，当我们认为模型中可能存在异常值时，使用L1损失函数可能会更好；但是，当我们需要把误差较大的观测也纳入模型中时，使用L2损失函数更好一些。
+    <br />解的稳定性:
+    <br />首先，从求解效率上来说，L2损失函数处处可导，而L1损失函数在零点位置是不可导的，这就使得使用L2损失函数求解可以得到一个解析解，而L1损失函数则没有；
+    <br />其次，当数据有一个微小的变化时，L1损失函数的变化更大，其解更加的不稳定。
+
+  <h2>3. 代码实现</h2>
+    <br />L1/L2 loss的Python代码
+    <pre>
+    import numpy as np
+    #定义L1损失函数
+    def L1_loss(y_true,y_pre): 
+        return np.sum(np.abs(y_true-y_pre))
+    #定义L2损失函数
+    def L2_loss(y_true,y_pre):
+        return np.sum(np.square(y_true-y_pre))</pre>
 </details>
 
 <details>
