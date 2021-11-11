@@ -24,11 +24,11 @@
 
 <details>
   <summary>L1/L2 loss</summary>
-  <h2>L1-norm loss function</h2>
+  <h2>1. L1-norm loss function</h2>
     <br /><img src = "figures/L1.png" width = "100%">
-  <h2>L2-norm loss function</h2>
+  <h2>2. L2-norm loss function</h2>
     <br /><img src = "figures/L2.png" width = "100%">
-  <h2>L1和L2 损失函数区别</h2>
+  <h2>3. L1和L2 损失函数区别</h2>
     <br />L2损失函数是最最常用的损失函数，在回归问题中，也就是我们耳熟能详的最小二乘法。并且在满足高斯马尔可夫条件的时候，可以证明使用L2损失函数所得的参数具有无偏性和有效性。
     <br />但是，L1损失函数也有其自己的优点，下面我们对两个损失函数进行比较。
     <br /><img src = "figures/L1L2.png" width = "100%"> 
@@ -39,7 +39,7 @@
     <br />首先，从求解效率上来说，L2损失函数处处可导，而L1损失函数在零点位置是不可导的，这就使得使用L2损失函数求解可以得到一个解析解，而L1损失函数则没有；
     <br />其次，当数据有一个微小的变化时，L1损失函数的变化更大，其解更加的不稳定。
 
-  <h2>3. 代码实现</h2>
+  <h2>4. 代码实现</h2>
     <br />L1/L2 loss的Python代码
     <pre>
     import numpy as np
