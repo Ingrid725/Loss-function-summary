@@ -114,7 +114,6 @@ def huber(true, pred, delta):
     def __init__(self, margin=2.0):
         super(ContrastiveLoss, self).__init__()
         self.margin = margin
-
     def forward(self, output1, output2, label):
         euclidean_distance = F.pairwise_distance(output1, output2)
         loss_contrastive = torch.mean((1-label)*torch.pow(euclidean_distance, 2)\
