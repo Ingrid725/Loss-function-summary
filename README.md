@@ -91,7 +91,7 @@ def huber(true, pred, delta):
   <h2>1. 损失函数介绍</h2>
     <br /> 回归问题损失函数，用于人脸识别，学习人脸的embedding, 相似的人脸对应的embedding在特征空间内相近，以此距离作人脸识别
   <h2>2. 表达式</h2>
-    <br />Logistic Loss 定义如下:
+    <br />Triplet Loss 定义如下:
     <br /> (a, p, n) a: anchor, p: positive sample, n: negetive sample
     <br /><img src = "figures/Triplet_loss.png" width = "50%">
   <h2>3. 代码实现</h2>
@@ -117,6 +117,7 @@ def huber(true, pred, delta):
 
     def forward(self, output1, output2, label):
         euclidean_distance = F.pairwise_distance(output1, output2)
-        loss_contrastive = torch.mean((1-label)*torch.pow(euclidean_distance, 2)+(label)*torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))     
+        loss_contrastive = torch.mean((1-label)*torch.pow(euclidean_distance, 2)\
+          +(label)*torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))     
         return loss_contrastive</pre>
 </details>
