@@ -30,7 +30,7 @@
               loss = (1 - p) ** self.gamma * logp
               loss = self.alpha*loss
               return loss.mean()
-    <\pre>
+    </pre>
 </details>
 
 <details>
@@ -38,13 +38,13 @@
   <h2>1. 损失函数介绍</h2>
     <br /> 用于2分类问题的不带参损失函数，标签值y的取值+1/-1, 预测值y'∈R, 该二分类问题的目标函数的要求：当y大于等于+1或者小于等于-1时，都是分类器确定的分类结果，此时的损失函数loss为0；而当预测值y'∈(−1,1)时，分类器对分类结果不确定，loss不为0。显然，当y'=0时，loss达到最大值重，从而使得模型在训练时更专注于难分类的样本。
   <h2>2. 表达式</h2>
-    <br />focal Loss 定义如下:
+    <br />Hinge Loss 定义如下:
     <br /><img src = "figures/hinge_loss.png" width = "50%">
   <h2>3. 代码实现</h2>
     <br />Focal损失函数的Python代码
     <pre>
        loss = max(0, 1-target*prediction)
-    <\pre>
+    </pre>
 </details>
 
 # 回归损失函数
