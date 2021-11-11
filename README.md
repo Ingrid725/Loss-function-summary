@@ -33,6 +33,31 @@
     <\pre>
 </details>
 
+<details>
+  <summary>Hinge Loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 用于2分类问题的不带参损失函数，标签值$y$的取值$\pm1$, 预测值$\hat{y} \in R$, 该二分类问题的目标函数的要求：当$\hat{y}$大于等于+1或者小于等于-1时，都是分类器确定的分类结果，此时的损失函数loss为0；而当预测值$\hat{y}$∈(−1,1)时，分类器对分类结果不确定，loss不为0。显然，当$\hat{y}$=0时，loss达到最大值重，从而使得模型在训练时更专注于难分类的样本。
+  <h2>2. 表达式</h2>
+    <br />focal Loss 定义如下:
+    <br /><img src = "figures/focal_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />Focal损失函数的Python代码
+    <pre>
+       class FocalLoss(nn.Module):
+          def __init__(self, gamma=0,alpha=1):
+              super(FocalLoss, self).__init__()
+              self.gamma = gamma
+              self.ce = nn.CrossEntropyLoss()
+              self.alpha=alpha
+          def forward(self, input, target):
+              logp = self.ce(input, target)
+              p = torch.exp(-logp)
+              loss = (1 - p) ** self.gamma * logp
+              loss = self.alpha*loss
+              return loss.mean()
+    <\pre>
+</details>
+
 # 回归损失函数
 <details>
   <summary>Huber loss</summary>
