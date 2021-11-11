@@ -110,7 +110,7 @@ def huber(true, pred, delta):
   <h2>3. 代码实现</h2>
     <br />交叉损失函数的Python代码
     <pre>
-    class ContrastiveLoss(torch.nn.Module):
+  class ContrastiveLoss(torch.nn.Module):
     def __init__(self, margin=2.0):
         super(ContrastiveLoss, self).__init__()
         self.margin = margin
