@@ -23,35 +23,6 @@
 </details>
 
 <details>
-  <summary>L1/L2 loss</summary>
-  <h2>1. L1-norm loss function</h2>
-    <br /><img src = "figures/L1.png" width = "100%">
-  <h2>2. L2-norm loss function</h2>
-    <br /><img src = "figures/L2.png" width = "100%">
-  <h2>3. L1和L2 损失函数区别</h2>
-    <br />L2损失函数是最最常用的损失函数，在回归问题中，也就是我们耳熟能详的最小二乘法。并且在满足高斯马尔可夫条件的时候，可以证明使用L2损失函数所得的参数具有无偏性和有效性。
-    <br />但是，L1损失函数也有其自己的优点，下面我们对两个损失函数进行比较。
-    <br /><img src = "figures/L1L2.png" width = "100%"> 
-    <br />稳健性:
-    <br />L1损失函数稳健性强是它最大的优点。面对误差较大的观测，L1损失函数不容易受到它的影响。这是因为:L1损失函数增加的只是一个误差，而L2损失函数增加的是误差的平方。当误差较大时，使用L2损失函数，我们需要更大程度的调整模型以适应这个观测，所以L2损失函数没有L1损失函数那么稳定。
-    <br />那么，当我们认为模型中可能存在异常值时，使用L1损失函数可能会更好；但是，当我们需要把误差较大的观测也纳入模型中时，使用L2损失函数更好一些。
-    <br />解的稳定性:
-    <br />首先，从求解效率上来说，L2损失函数处处可导，而L1损失函数在零点位置是不可导的，这就使得使用L2损失函数求解可以得到一个解析解，而L1损失函数则没有；
-    <br />其次，当数据有一个微小的变化时，L1损失函数的变化更大，其解更加的不稳定。
-
-  <h2>4. 代码实现</h2>
-    <br />L1/L2 loss的Python代码
-    <pre>
-    import numpy as np
-    #定义L1损失函数
-    def L1_loss(y_true,y_pre): 
-        return np.sum(np.abs(y_true-y_pre))
-    #定义L2损失函数
-    def L2_loss(y_true,y_pre):
-        return np.sum(np.square(y_true-y_pre))</pre>
-</details>
-
-<details>
   <summary>Focal Loss</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> Focal Loss是用于分类问题的带参损失函数, 当前object detection算法：
@@ -124,6 +95,34 @@ def huber(true, pred, delta):
     return np.sum(loss)</pre>
 </details>
 
+<details>
+  <summary>L1/L2 loss</summary>
+  <h2>1. L1-norm loss function</h2>
+    <br /><img src = "figures/L1.png" width = "100%">
+  <h2>2. L2-norm loss function</h2>
+    <br /><img src = "figures/L2.png" width = "100%">
+  <h2>3. L1和L2 损失函数区别</h2>
+    <br />L2损失函数是最最常用的损失函数，在回归问题中，也就是我们耳熟能详的最小二乘法。并且在满足高斯马尔可夫条件的时候，可以证明使用L2损失函数所得的参数具有无偏性和有效性。
+    <br />但是，L1损失函数也有其自己的优点，下面我们对两个损失函数进行比较。
+    <br /><img src = "figures/L1L2.png" width = "100%"> 
+    <br />稳健性:
+    <br />L1损失函数稳健性强是它最大的优点。面对误差较大的观测，L1损失函数不容易受到它的影响。这是因为:L1损失函数增加的只是一个误差，而L2损失函数增加的是误差的平方。当误差较大时，使用L2损失函数，我们需要更大程度的调整模型以适应这个观测，所以L2损失函数没有L1损失函数那么稳定。
+    <br />那么，当我们认为模型中可能存在异常值时，使用L1损失函数可能会更好；但是，当我们需要把误差较大的观测也纳入模型中时，使用L2损失函数更好一些。
+    <br />解的稳定性:
+    <br />首先，从求解效率上来说，L2损失函数处处可导，而L1损失函数在零点位置是不可导的，这就使得使用L2损失函数求解可以得到一个解析解，而L1损失函数则没有；
+    <br />其次，当数据有一个微小的变化时，L1损失函数的变化更大，其解更加的不稳定。
+
+  <h2>4. 代码实现</h2>
+    <br />L1/L2 loss的Python代码
+    <pre>
+    import numpy as np
+    #定义L1损失函数
+    def L1_loss(y_true,y_pre): 
+        return np.sum(np.abs(y_true-y_pre))
+    #定义L2损失函数
+    def L2_loss(y_true,y_pre):
+        return np.sum(np.square(y_true-y_pre))</pre>
+</details>
 
 # 特定任务损失函数
 <details>
