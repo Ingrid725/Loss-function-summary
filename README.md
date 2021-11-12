@@ -144,7 +144,7 @@ def huber(true, pred, delta):
     <pre>
        triplet_loss = np.maximum(positive_dist - negative_dist + margin, 0.0)</pre>
 </details>
-  
+
 <details>
   <summary>Contrastive Loss</summary>
   <h2>1. 损失函数介绍</h2>
@@ -164,4 +164,30 @@ def huber(true, pred, delta):
         loss_contrastive = torch.mean((1-label)*torch.pow(euclidean_distance, 2)\
           +(label)*torch.pow(torch.clamp(self.margin - euclidean_distance, min=0.0), 2))     
         return loss_contrastive</pre>
+</details>
+  
+<details>
+  <summary>Quadruplet loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 对比学习的损失函数，一部分就是正常的triplet loss，这部分loss能够让模型区分出正样本对和负样本对之间的相对距离。另一部分是正样本对和其他任意负样本对之前的相对距离。这一部分约束可以理解成最小的类间距离都要大于类内距离。
+  <h2>2. 表达式</h2>
+    <br />>Quadruplet loss 定义如下:
+    <br /><img src = "figures/Quadruplet_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />交叉损失函数的Python代码
+    <pre>
+  import tensorflow as tf
+  def bh_quadruplet_loss(dists, labels):
+    # Defines the "batch hard" quadruplet loss function.
+    same_identity_mask = tf.equal(tf.expand_dims(labels, axis=1),tf.expand_dims(labels, axis=0))
+    negative_mask = tf.logical_not(same_identity_mask)
+    positive_mask = tf.logical_xor(same_identity_mask,tf.eye(tf.shape(labels)[0], dtype=tf.bool))
+    different_mask = tf.logical_and(negative_mask,positive_mask )   #create the different probe of data
+    furthest_positive = tf.reduce_max(dists * tf.cast(positive_mask, tf.float32), axis=1)
+    closest_negative = tf.map_fn(lambda x: tf.reduce_min(tf.boolean_mask(x[0], x[1])),
+                                 (dists, negative_mask), tf.float32)
+    different_negative = tf.map_fn(lambda x: tf.reduce_min(tf.boolean_mask(x[0], x[1])),
+                                 (dists, different_mask), tf.float32)
+    diff = 2*furthest_positive - closest_negative-different_negative
+    return tf.maximum(diff + TL_MARGIN, 0.0)
 </details>
