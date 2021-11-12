@@ -128,7 +128,15 @@ def huber(true, pred, delta):
 <details>
   <summary>Verification loss(Re-ID)</summary>
   <h2>1. 损失函数介绍</h2>
+    <br /> verification loss可以度量两个样本之间的关系。
   <h2>2. 表达式</h2>
+    <br />>定义\:每一对训练图片都有一个标签(same/not)，其中表示两张图片属于同一个行人(正样本对)，反之表示它们属于不同行人(负样本对)。一般情况下，通过fij=(fi-fj)^2得到差分特征fij，其中fi和fj是两个样本xi和xj的嵌入特征。 我们使用p(δij | fij )表示输入对(xi和xj)被识别为δij（0或1)的概率。
+    <br /><img src = "figures/Verification_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />Verification loss的Python代码
+    <pre>
+  def KL(P,Q):
+    return sum(P * log(P / Q))
 </details>
   
 <details>
