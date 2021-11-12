@@ -174,7 +174,7 @@ def huber(true, pred, delta):
     <br />>Quadruplet loss 定义如下:
     <br /><img src = "figures/Quadruplet_loss.png" width = "50%">
   <h2>3. 代码实现</h2>
-    <br />交叉损失函数的Python代码
+    <br />Quadruplet loss函数的Python代码
     <pre>
   import tensorflow as tf
   def bh_quadruplet_loss(dists, labels):
@@ -190,4 +190,19 @@ def huber(true, pred, delta):
                                  (dists, different_mask), tf.float32)
     diff = 2*furthest_positive - closest_negative-different_negative
     return tf.maximum(diff + TL_MARGIN, 0.0)
+</details>
+
+# 度量两个概率的相似度函数
+<details>
+  <summary>KL散度</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 相对熵，又被称为KL散度或信息散度，是两个概率分布间差异的非对称性度量 。在信息论中，相对熵等价于两个概率分布的信息熵的差值，若其中一个概率分布为真实分布，另一个为理论（拟合）分布，则此时相对熵等于交叉熵与真实分布的信息熵之差，表示使用理论分布拟合真实分布时产生的信息损耗 。
+  <h2>2. 表达式</h2>
+    <br />>KL散度定义如下（注意：p*log（p）-p*log(q)=p*log（p/q)，前者更利于推导的理解，后者实现起来更方便）:
+    <br /><img src = "figures/KL.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />KL散度的Python代码
+    <pre>
+  def KL(P,Q):
+    return sum(P * log(P / Q))
 </details>
