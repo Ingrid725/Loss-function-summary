@@ -213,3 +213,16 @@ def huber(true, pred, delta):
   def KL(P,Q):
     return sum(P * log(P / Q))
 </details>
+  
+<details>
+  <summary>Siamese network</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 孪生神经网络用来衡量两个输入的相似程度。孪生神经网络有两个输入（Input1 and Input2）,将两个输入feed进入两个神经网络（Network1 and Network2），这两个神经网络分别将输入映射到新的空间，形成输入在新的空间中的表示。通过Loss的计算，评价两个输入的相似度。
+  <h2>2. 形式</h2>
+    <br />>标准的孪生网络是共享权值的:
+    <br /><img src = "figures/Siamese_network.png" width = "50%">
+    <br />>伪孪生网络（pseudo-siamese network）是不共享权值的:
+    <br /><img src = "figures/pseudo-siamese_network.png" width = "50%">
+  <h2>3. 损失函数的选择</h2>
+    <br />siamese network的初衷是计算两个输入的相似度,。左右两个神经网络分别将输入转换成一个"向量"，在新的空间中，通过判断cosine距离就能得到相似度了。传统的siamese network使用Contrastive Loss。
+</details>
