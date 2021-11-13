@@ -135,8 +135,8 @@ def huber(true, pred, delta):
   <h2>3. 代码实现</h2>
     <br />Verification loss的Python代码
     <pre>
-  def KL(P,Q):
-    return sum(P * log(P / Q))
+  def Verification(y,f):
+    return -y*torch.log(p(y,f))-(1-y)*torch.log(1-p(y,f))
 </details>
   
 <details>
@@ -200,7 +200,6 @@ def huber(true, pred, delta):
     return tf.maximum(diff + TL_MARGIN, 0.0)
 </details>
 
-# 度量两个概率的相似度函数
 <details>
   <summary>KL散度</summary>
   <h2>1. 损失函数介绍</h2>
