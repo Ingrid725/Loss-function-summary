@@ -75,8 +75,6 @@
        loss = 1 / (1 + torch.exp(-x))</pre>
 </details>
 
-
-
 # 回归损失函数
 <details>
   <summary>Huber loss</summary>
@@ -225,4 +223,44 @@ def huber(true, pred, delta):
     <br /><img src = "figures/pseudo-siamese network.png" width = "50%">
   <h2>3. 损失函数的选择</h2>
     <br />siamese network的初衷是计算两个输入的相似度,。左右两个神经网络分别将输入转换成一个"向量"，在新的空间中，通过判断cosine距离就能得到相似度了。传统的siamese network使用Contrastive Loss。
+</details>
+
+<details>
+  <summary>distribution ranking</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 这是目标检测领域内提出的loss。在单阶段目标检测任务中存在两个问题，首先，类别之间的候选数量不均衡。如果没有区域提出(region proposal)阶段，背景候选的数量很容易超过前景候选的数量。第二，背景候选的分布不平衡。它们中的大多数可以很容易地与前景对象分开，而只有少数很难区分。考虑到背景候选的不平衡，引入distributional ranking (DR)损失，将前景的约束分布排序在背景候选人的约束分布之上。通过对候选项进行重新加权，得到对应于最坏情况下损失的分布，损失可以集中在前景和背景分布之间的决策边界上。
+  <h2>2. 表达式</h2>
+    <br />distribution ranking定义如下:
+    <br /><img src = "figures/distribution_ranking.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />distribution ranking的Python代码
+    <pre>
+class SigmoidDRLoss(nn.Module):
+    def __init__(self, pos_lambda=1, neg_lambda=0.1/math.log(3.5), L=6., tau=4.):
+        super(SigmoidDRLoss, self).__init__()
+        self.margin = 0.5
+        self.pos_lambda = pos_lambda
+        self.neg_lambda = neg_lambda
+        self.L = L
+        self.tau = tau
+
+    def forward(self, logits, targets):
+        num_classes = logits.shape[1]
+        dtype = targets.dtype
+        device = targets.device
+        class_range = torch.arange(1, num_classes + 1, dtype=dtype, device=device).unsqueeze(0)
+        t = targets.unsqueeze(1)
+        pos_ind = (t == class_range)
+        neg_ind = (t != class_range) * (t >= 0)
+        pos_prob = logits[pos_ind].sigmoid()
+        neg_prob = logits[neg_ind].sigmoid()
+        neg_q = F.softmax(neg_prob/self.neg_lambda, dim=0)
+        neg_dist = torch.sum(neg_q * neg_prob)
+        if pos_prob.numel() > 0:
+            pos_q = F.softmax(-pos_prob/self.pos_lambda, dim=0)
+            pos_dist = torch.sum(pos_q * pos_prob)
+            loss = self.tau*torch.log(1.+torch.exp(self.L*(neg_dist - pos_dist+self.margin)))/self.L
+        else:
+            loss = self.tau*torch.log(1.+torch.exp(self.L*(neg_dist - 1. + self.margin)))/self.L
+        return loss
 </details>
