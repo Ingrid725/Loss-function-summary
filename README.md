@@ -222,7 +222,7 @@ def huber(true, pred, delta):
     <br />标准的孪生网络是共享权值的:
     <br /><img src = "figures/Siamese_network.png" width = "50%">
     <br />伪孪生网络（pseudo-siamese network）是不共享权值的:
-    <br /><img src = "figures/pseudo-siamese_network.png" width = "50%">
+    <br /><img src = "figures/pseudo-siamese network.png" width = "50%">
   <h2>3. 损失函数的选择</h2>
     <br />siamese network的初衷是计算两个输入的相似度,。左右两个神经网络分别将输入转换成一个"向量"，在新的空间中，通过判断cosine距离就能得到相似度了。传统的siamese network使用Contrastive Loss。
 </details>
