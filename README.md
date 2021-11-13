@@ -130,7 +130,7 @@ def huber(true, pred, delta):
   <h2>1. 损失函数介绍</h2>
     <br /> verification loss可以度量两个样本之间的关系。
   <h2>2. 表达式</h2>
-    <br />>定义\:每一对训练图片都有一个标签(same/not)，其中表示两张图片属于同一个行人(正样本对)，反之表示它们属于不同行人(负样本对)。一般情况下，通过fij=(fi-fj)^2得到差分特征fij，其中fi和fj是两个样本xi和xj的嵌入特征。 我们使用p(δij | fij )表示输入对(xi和xj)被识别为δij（0或1)的概率。
+    <br />定义\:每一对训练图片都有一个标签(same/not)，其中表示两张图片属于同一个行人(正样本对)，反之表示它们属于不同行人(负样本对)。一般情况下，通过fij=(fi-fj)^2得到差分特征fij，其中fi和fj是两个样本xi和xj的嵌入特征。 我们使用p(δij | fij )表示输入对(xi和xj)被识别为δij（0或1)的概率。
     <br /><img src = "figures/Verification_loss.png" width = "50%">
   <h2>3. 代码实现</h2>
     <br />Verification loss的Python代码
@@ -179,7 +179,7 @@ def huber(true, pred, delta):
   <h2>1. 损失函数介绍</h2>
     <br /> 对比学习的损失函数，一部分就是正常的triplet loss，这部分loss能够让模型区分出正样本对和负样本对之间的相对距离。另一部分是正样本对和其他任意负样本对之前的相对距离。这一部分约束可以理解成最小的类间距离都要大于类内距离。
   <h2>2. 表达式</h2>
-    <br />>Quadruplet loss 定义如下:
+    <br />Quadruplet loss 定义如下:
     <br /><img src = "figures/Quadruplet_loss.png" width = "50%">
   <h2>3. 代码实现</h2>
     <br />Quadruplet loss函数的Python代码
@@ -205,7 +205,7 @@ def huber(true, pred, delta):
   <h2>1. 损失函数介绍</h2>
     <br /> 相对熵，又被称为KL散度或信息散度，是两个概率分布间差异的非对称性度量 。在信息论中，相对熵等价于两个概率分布的信息熵的差值，若其中一个概率分布为真实分布，另一个为理论（拟合）分布，则此时相对熵等于交叉熵与真实分布的信息熵之差，表示使用理论分布拟合真实分布时产生的信息损耗 。
   <h2>2. 表达式</h2>
-    <br />>KL散度定义如下（注意：p*log（p）-p*log(q)=p*log（p/q)，前者更利于推导的理解，后者实现起来更方便）:
+    <br />KL散度定义如下（注意：p*log（p）-p*log(q)=p*log（p/q)，前者更利于推导的理解，后者实现起来更方便）:
     <br /><img src = "figures/KL.png" width = "50%">
   <h2>3. 代码实现</h2>
     <br />KL散度的Python代码
@@ -219,9 +219,9 @@ def huber(true, pred, delta):
   <h2>1. 损失函数介绍</h2>
     <br /> 孪生神经网络用来衡量两个输入的相似程度。孪生神经网络有两个输入（Input1 and Input2）,将两个输入feed进入两个神经网络（Network1 and Network2），这两个神经网络分别将输入映射到新的空间，形成输入在新的空间中的表示。通过Loss的计算，评价两个输入的相似度。
   <h2>2. 形式</h2>
-    <br />>标准的孪生网络是共享权值的:
+    <br />标准的孪生网络是共享权值的:
     <br /><img src = "figures/Siamese_network.png" width = "50%">
-    <br />>伪孪生网络（pseudo-siamese network）是不共享权值的:
+    <br />伪孪生网络（pseudo-siamese network）是不共享权值的:
     <br /><img src = "figures/pseudo-siamese_network.png" width = "50%">
   <h2>3. 损失函数的选择</h2>
     <br />siamese network的初衷是计算两个输入的相似度,。左右两个神经网络分别将输入转换成一个"向量"，在新的空间中，通过判断cosine距离就能得到相似度了。传统的siamese network使用Contrastive Loss。
