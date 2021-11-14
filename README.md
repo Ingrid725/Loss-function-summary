@@ -288,6 +288,14 @@ def huber(true, pred, delta):
 </details>
 
 <details>
+  <summary>Chamfer Distance（目标检测）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 一种对于图像的距离变换（distance transform），常用于shaped based object detection。对于一个有特征点和非特征点的二值图像，此距离变换就是求解每一个点到最近特征点的距离。
+  <h2>2. 形式</h2>
+    <br /><img src = "figures/Chamfer.png" width = "50%">
+</details>
+	
+<details>
   <summary>distribution ranking（目标检测）</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> 这是目标检测领域内提出的loss。在单阶段目标检测任务中存在两个问题，首先，类别之间的候选数量不均衡。如果没有区域提出(region proposal)阶段，背景候选的数量很容易超过前景候选的数量。第二，背景候选的分布不平衡。它们中的大多数可以很容易地与前景对象分开，而只有少数很难区分。考虑到背景候选的不平衡，引入distributional ranking (DR)损失，将前景的约束分布排序在背景候选人的约束分布之上。通过对候选项进行重新加权，得到对应于最坏情况下损失的分布，损失可以集中在前景和背景分布之间的决策边界上。
