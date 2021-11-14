@@ -77,6 +77,16 @@
 
 # 回归损失函数
 <details>
+  <summary>Quantile Loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 分位数回归 Quantile Regression 是一类在实际应用中非常有用的回归算法，通常的回归算法是拟合目标值的期望或者中位数，而分位数回归可以通过给定不同的分位点，拟合目标值的不同分位数。
+    <br /> 分位数回归是通过使用分位数损失 Quantile Loss 来实现这一点的，分位数损失形式如下，式中的 r 分位数系数。
+    <br /><img src = "figures/quantile loss.png" width = "50%">
+  <h2>2. 代码实现</h2>
+    <br />https://link.zhihu.com/?target=https%3A//gist.github.com/borgwang/4313e9375ef233c3b812f9f80f1af2bb
+</details>
+
+<details>
   <summary>Huber loss</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> Huber Loss 是一个用于回归问题的带参损失函数, 优点是能增强平方误差损失函数(MSE, mean square error)对离群点的鲁棒性。
