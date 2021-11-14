@@ -451,6 +451,25 @@ class SigmoidDRLoss(nn.Module):
 </details>
 	
 <details>
+  <summary>Edit loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 编辑距离，也叫莱文斯坦Levenshtein 距离，指的是两个字符串之间，由一个转换成另一个所需的最少编辑操作次数。许可的编辑操作包括将一个字符替换成另一个字符，插入一个字符，删除一个字符。
+    <br /> 该损失函数的优势在于类似于ctc loss可以计算2个长度不等的序列的损失。编辑距离越大的词被认为是越不相同的。
+  <h2>2. 算法</h2>
+    <br />编辑距离的算法是首先由俄国科学家Levenshtein提出的，故又叫Levenshtein Distance。源词s，目标词t，算法如下：
+    <br /><img src = "figures/Edit.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <br />Edit loss Tensorflow代码
+    <pre>
+	tf.edit_distance(
+	    hypothesis,
+	    truth,
+	    normalize=True,
+	    name='edit_distance'
+	)</pre>
+</details>
+	
+<details>
   <summary>r precision</summary>
     <br /><img src = "figures/r_precision.png" width = "100%">
 </details>
