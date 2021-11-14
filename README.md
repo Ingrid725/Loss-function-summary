@@ -271,5 +271,5 @@ class SigmoidDRLoss(nn.Module):
     <br /> Temporal difference是强化学习中的一种方法。
     <br /> 时间差分是强化学习中最核心也最新奇的想法。它混合了动态规划和蒙特卡洛。和蒙特卡洛类似，时间差分方法从历史经验中去学习，利用了采样的思想；和动态规划类似，使用贝尔曼方程，使用后继状态的值函数更新当前状态的值函数。
   <h2>2. 表达式</h2>
-    <br /><img src = "figures/TD.png" width = "50%">
+    <br /><img src = "figures/TD.png" width = "100%">
 </details>
