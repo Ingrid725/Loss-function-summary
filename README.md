@@ -293,3 +293,9 @@ class SigmoidDRLoss(nn.Module):
   <summary>OIM</summary>
     <br /><img src = "figures/OIM.png" width = "100%">
 </details>
+
+
+<details>
+  <summary>OIM</summary>
+    <br /><img src = "figures/r_precision.png" width = "100%">
+</details>
