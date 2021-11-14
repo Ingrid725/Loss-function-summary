@@ -264,3 +264,16 @@ class SigmoidDRLoss(nn.Module):
             loss = self.tau*torch.log(1.+torch.exp(self.L*(neg_dist - 1. + self.margin)))/self.L
         return loss
 </details>
+  
+<details>
+  <summary>Temporal difference</summary>
+  <h2>1. 介绍</h2>
+    <br /> Temporal difference是强化学习中的一种方法。
+    <br /> 时间差分是强化学习中最核心也最新奇的想法。它混合了动态规划和蒙特卡洛。和蒙特卡洛类似，时间差分方法从历史经验中去学习，利用了采样的思想；和动态规划类似，使用贝尔曼方程，使用后继状态的值函数更新当前状态的值函数。
+  <h2>2. 表达式</h2>
+  <h2>3. 代码实现</h2>
+    <br />Verification loss的Python代码
+    <pre>
+  def Verification(y,f):
+    return -y*torch.log(p(y,f))-(1-y)*torch.log(1-p(y,f))
+</details>
