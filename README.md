@@ -83,7 +83,7 @@
     <br /> 分位数回归是通过使用分位数损失 Quantile Loss 来实现这一点的，分位数损失形式如下，式中的 r 分位数系数。
     <br /><img src = "figures/quantile loss.png" width = "50%">
   <h2>2. 代码实现</h2>
-    <br />https://link.zhihu.com/?target=https%3A//gist.github.com/borgwang/4313e9375ef233c3b812f9f80f1af2bb
+    <br />https://gist.github.com/borgwang/4313e9375ef233c3b812f9f80f1af2bb
 </details>
 
 <details>
