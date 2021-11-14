@@ -299,3 +299,52 @@ class SigmoidDRLoss(nn.Module):
   <summary>r precision</summary>
     <br /><img src = "figures/r_precision.png" width = "100%">
 </details>
+  
+<details>
+  <summary>Perceptual Loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 超分辨率问题中的损失函数，也被称为感知损失函数。传统的超分工作中通常采用像素级的误差损失，却没有捕获到预测结果和Ground truth之间的感知区别。而感知损失则提供了一种建立在像素级别以上的对图像更高级语义信息的比较。
+  <h2>2. 表达式</h2>
+    <br />Perceptual Loss 定义如下:
+    <br /><img src = "figures/Perceptual loss.png" width = "100%">
+</details>
+  
+<details>
+  <summary>Wasserstein Distance</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 传统的GAN loss中（JS散度和KL散度）存在很多问题，导致GAN的训练十分困难，主要表现为：模式坍塌（生成样本多样性不足）、不稳定（难以收敛）。很多研究都对GAN训练的困难性进行了探讨，最关键的问题在于，采用KL散度和JS散度作为两个概率的差异的衡量，如果两个概率的支撑集不重叠，就无法让那个参数化的、可移动的概率分布慢慢靠近以拟合目标分布。因此，研究者提出Wasserstein GAN，即WGAN，采用一种新的Loss定义，即Wasserstein Distance，作为两个概率分布的距离衡量指标。
+  <h2>2. 表达式</h2>
+    <br />Wasserstein Distance定义如下:
+    <br /><img src = "figures/Wasserstein Distance.PNG" width = "50%">
+</details>
+  
+<details>
+  <summary>SSIM Loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 当对一幅图片进行有损压缩，或者一幅图片有了噪声、畸变（distortion）等。我们人可以分辨出这两幅图大概率还是同一幅图，但如何有效地衡量他们的相似性呢？传统的L2距离（Mean Square Error,MSE）和L1距离无法衡量图片的结构相似性，因此需要新的度量标准弥补这一缺陷。
+  
+  研究发现，人眼对光照不敏感，但对局部（图像不同部分）光照的变化敏感；对灰度不敏感，但对各部分灰度的相对变化程度（对比度变化）敏感；并且对整体的结构敏感。基于以上先验信息，研究者提出了SSIM这种structure similarity的方法来做最后变化后的图片与变化前的结构相似性。
+  <h2>2. 表达式</h2>
+    <br />SSIM Loss定义如下:
+    <br /><img src = "figures/SSIM Loss.PNG" width = "50%">
+</details>
+  
+<details>
+  <summary>FID</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> FID (Frechet Inception Distance score)是计算真实图像和生成图像的特征向量之间距离的一种度量。FID 从原始图像的计算机视觉特征的统计方面的相似度来衡量两组图像的相似度，这种视觉特征是使用 Inception v3 图像分类模型计算的得到的。分数越低代表两组图像越相似，或者说二者的统计量越相似，FID 在最佳情况下的得分为 0.0，表示两组图像相同。FID 分数被用于评估由生成性对抗网络生成的图像的质量，较低的分数与较高质量的图像有很高的相关性。
+  <h2>2. 表达式</h2>
+    <br />FID定义如下:
+    <br /><img src = "figures/FID.PNG" width = "80%">
+</details>
+  
+<details>
+  <summary>Inception</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 评价一个生成模型，我们需要考验它两方面性能：1. 生成的图片是否清晰；2. 生成的图片是否多样。生成的图片不够清晰，显然说明生成模型表现欠佳；生成的图片足够清晰，我们还要看是不是能生成足够多样的图片，有些生成模型只能生成有限的几种清晰图片，陷入了所谓 mode collapse，也并不能看作是好的模型。而Inception Score正是这样一种衡量清晰度和多样性的度量指标。更直观而言，对于单一的生成图像，Inception输出的概率分布熵值应该尽量小，因为越小说明生成图像越有可能属于某个类别，代表图像质量高；对于生成器生成的一批图像而言，Inception输出的平均概率分布熵值应该尽量大。因为生成器应该保证生成图像的多样性。
+  <h2>2. 表达式</h2>
+    <br />Wasserstein Distance定义如下:
+    <br /><img src = "figures/Inception.PNG" width = "50%">
+</details>
+  
+
