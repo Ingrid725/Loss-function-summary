@@ -283,3 +283,8 @@ class SigmoidDRLoss(nn.Module):
   <h2>2. 算法流程</h2>
     <br /><img src = "figures/T D.png" width = "100%">
 </details>
+
+  <details>
+  <summary>DAMSM</summary>
+    <br /><img src = "figures/DAMSM.png" width = "100%">
+</details>
