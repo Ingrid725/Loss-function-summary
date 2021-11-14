@@ -292,7 +292,7 @@ def huber(true, pred, delta):
   <h2>1. 损失函数介绍</h2>
     <br /> 一种对于图像的距离变换（distance transform），常用于shaped based object detection。对于一个有特征点和非特征点的二值图像，此距离变换就是求解每一个点到最近特征点的距离。
   <h2>2. 形式</h2>
-    <br /><img src = "figures/Chamfer.png" width = "50%">
+    <br /><img src = "figures/Chamfer.png" width = "100%">
 </details>
 	
 <details>
