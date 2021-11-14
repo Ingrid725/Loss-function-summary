@@ -347,4 +347,111 @@ class SigmoidDRLoss(nn.Module):
     <br /><img src = "figures/Inception.PNG" width = "50%">
 </details>
   
+<details>
+  <summary>Dice loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />Dice系数是一种集合相似度度量，是语义分割任务的评价指标之一。
+    <br />Dice loss用于分割任务，是一种基于区域的损失函数，直接优化Dice系数，同时可以减少类别不平衡问题的影响。
+  <h2>2. 表达式</h2>
+    <br /><img src = "figures/dice_loss.png" width = "25%">
+  <h2>3. 代码实现</h2>
+    <pre>
+    def dice_loss(pred, target):
+        # shape of pred and target: NxCxHxW
+        intersection = (pred * target).sum(dim=(2, 3))
+        loss = (2. * intersection + 1.) / (pred.sum(dim=(2, 3)) + target.sum(dim=(2, 3)) + 1.)
+        return 1 - loss.mean()
+	</pre>
+</details>
 
+<details>
+  <summary>IoU loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />IoU loss用于目标检测任务的边界框回归分支。
+    <br />IoU loss直接优化预测边界框与真实边界框之间的交并比，与分别优化边界框的坐标不同，IoU loss考虑了不同坐标之间的相互关系，也可以降低损失对目标尺寸的敏感性。
+  <h2>2. 表达式</h2>
+    <br /><img src = "figures/iou_loss.png" width = "25%">
+  <h2>3. 代码实现</h2>
+    <pre>
+    def iou_loss(pred, target):
+        # shape of pred and target: Nx4
+        pred_t, pred_l, pred_b, pred_r = pred.split(1,dim=1)
+        target_t, target_l, target_b, target_r = target.split(1,dim=1)
+        pred_area = (pred_t + pred_b) * (pred_l + pred_r)
+        target_area = (target_t + target_b) * (target_l + target_r)
+        i_h = torch.min(pred_t, target_t) + torch.min(pred_b, target_b)
+        i_w = torch.min(pred_l, target_l) + torch.min(pred_r, target_r)
+        intersection = 
+        loss = - torch.log(intersection / (pred_area + target_area - intersection + 1.))
+        return loss.mean()
+	</pre>
+</details>
+
+<details>
+  <summary>Reconstruction loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />faceswap-GAN中构建了一个编码器和两个解码器，训练时使用Reconstruction loss，使源人脸和目标人脸通过对应的编码器和解码器后能够重建，以此训练编码器和解码器。Reconstruction loss使用L1 loss。
+  <h2>2. 表达式</h2>
+    <br /><img src = "figures/recon_loss.png" width = "25%">
+</details>
+
+<details>
+  <summary>Center loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />Center loss用于人脸识别，与softmax cross entropy loss一起使用。Center loss同时学习每个类的特征中心，并惩罚人脸特征与其对应的中心之间的距离。
+    <br />Center loss可以尽可能增大类间距离和类内紧凑性，对于人脸识别非常重要。
+  <h2>2. 表达式</h2>
+    <br /><img src = "figures/center_loss_1.png" width = "25%">
+    <br />类别中心在每个mini-batch中的更新量为
+    <br /><img src = "figures/center_loss_2.png" width = "25%">
+  <h2>3. 代码实现</h2>
+    <pre>
+    class CenterLoss(nn.Module):
+        def __init__(self, num_classes, feat_dim):
+            super(CenterLoss, self).__init__()
+            self.num_classes = num_classes
+            self.feat_dim = feat_dim
+            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
+    
+        def forward(self, x, labels):
+            batch_size = x.size(0)
+            distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes) + \
+                      torch.pow(self.centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
+            distmat.addmm_(1, -2, x, self.centers.t())
+            classes = torch.arange(self.num_classes).long()
+            labels = labels.unsqueeze(1).expand(batch_size, self.num_classes)
+            mask = labels.eq(classes.expand(batch_size, self.num_classes))
+            dist = distmat * mask.float()
+            loss = dist.sum() / batch_size
+            return loss
+	</pre>
+</details>
+
+<details>
+  <summary>Circle loss</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />Circle loss可以用于依赖特征学习的任务（人脸识别、行人重识别、细粒度图像检索等）。
+    <br />深度特征学习有两种基本范式，分别是使用类标签和使用正负样本对标签进行学习。这两种学习方法之间并无本质区别，其目标都是最大化类内相似度（s_p）和最小化类间相似度（s_n），很多常用的损失函数都会将s_n和s_p组合成相似度对来优化，并试图减小s_n-s_p。
+    <br />Circle loss旨在最大化类内相似度，最小化类间相似度：把所有的s_p和s_n两两配对，并减小在所有的相似性对上二者的差值，并通过两个线性因子控制对相似度的惩罚程度，实现更灵活的优化途径和更明确的优化目标。
+    <h2>2. 表达式</h2>
+    <br /><img src = "figures/circle_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <pre>
+    class CircleLoss(nn.Module):
+        def __init__(self, m, gamma):
+            super(CircleLoss, self).__init__()
+            self.m = m
+            self.gamma = gamma
+            self.soft_plus = nn.Softplus()
+    
+        def forward(self, sp, sn):
+            ap = torch.clamp_min(- sp.detach() + 1 + self.m, min=0.)
+            an = torch.clamp_min(sn.detach() + self.m, min=0.)
+            delta_p = 1 - self.m
+            delta_n = self.m
+            logit_p = - ap * (sp - delta_p) * self.gamma
+            logit_n = an * (sn - delta_n) * self.gamma
+            loss = self.soft_plus(torch.logsumexp(logit_n, dim=0) + torch.logsumexp(logit_p, dim=0))
+            return loss
+	</pre>
+</details>
