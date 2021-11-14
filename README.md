@@ -134,7 +134,7 @@ def huber(true, pred, delta):
 
 # 特定任务损失函数
 <details>
-  <summary>Verification loss(Re-ID)</summary>
+  <summary>Verification loss(行人重识别)</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> verification loss可以度量两个样本之间的关系。
   <h2>2. 表达式</h2>
@@ -146,9 +146,75 @@ def huber(true, pred, delta):
   def Verification(y,f):
     return -y*torch.log(p(y,f))-(1-y)*torch.log(1-p(y,f))
 </details>
-  
+
 <details>
-  <summary>Triplet Loss</summary>
+  <summary>OIM（行人重识别）</summary>
+    <br /><img src = "figures/OIM.png" width = "100%">
+</details>
+
+<details>
+  <summary>Center loss（用于人脸识别）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />Center loss用于人脸识别，与softmax cross entropy loss一起使用。Center loss同时学习每个类的特征中心，并惩罚人脸特征与其对应的中心之间的距离。
+    <br />Center loss可以尽可能增大类间距离和类内紧凑性，对于人脸识别非常重要。
+  <h2>2. 表达式</h2>
+    <br /><img src = "figures/center_loss_1.png" width = "25%">
+    <br />类别中心在每个mini-batch中的更新量为
+    <br /><img src = "figures/center_loss_2.png" width = "25%">
+  <h2>3. 代码实现</h2>
+    <pre>
+    class CenterLoss(nn.Module):
+        def __init__(self, num_classes, feat_dim):
+            super(CenterLoss, self).__init__()
+            self.num_classes = num_classes
+            self.feat_dim = feat_dim
+            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
+    
+        def forward(self, x, labels):
+            batch_size = x.size(0)
+            distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes) + \
+                      torch.pow(self.centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
+            distmat.addmm_(1, -2, x, self.centers.t())
+            classes = torch.arange(self.num_classes).long()
+            labels = labels.unsqueeze(1).expand(batch_size, self.num_classes)
+            mask = labels.eq(classes.expand(batch_size, self.num_classes))
+            dist = distmat * mask.float()
+            loss = dist.sum() / batch_size
+            return loss
+	</pre>
+</details>
+
+<details>
+  <summary>Circle loss（人脸识别、行人重识别、细粒度图像检索等）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />Circle loss可以用于依赖特征学习的任务（人脸识别、行人重识别、细粒度图像检索等）。
+    <br />深度特征学习有两种基本范式，分别是使用类标签和使用正负样本对标签进行学习。这两种学习方法之间并无本质区别，其目标都是最大化类内相似度（s_p）和最小化类间相似度（s_n），很多常用的损失函数都会将s_n和s_p组合成相似度对来优化，并试图减小s_n-s_p。
+    <br />Circle loss旨在最大化类内相似度，最小化类间相似度：把所有的s_p和s_n两两配对，并减小在所有的相似性对上二者的差值，并通过两个线性因子控制对相似度的惩罚程度，实现更灵活的优化途径和更明确的优化目标。
+    <h2>2. 表达式</h2>
+    <br /><img src = "figures/circle_loss.png" width = "50%">
+  <h2>3. 代码实现</h2>
+    <pre>
+    class CircleLoss(nn.Module):
+        def __init__(self, m, gamma):
+            super(CircleLoss, self).__init__()
+            self.m = m
+            self.gamma = gamma
+            self.soft_plus = nn.Softplus()
+    
+        def forward(self, sp, sn):
+            ap = torch.clamp_min(- sp.detach() + 1 + self.m, min=0.)
+            an = torch.clamp_min(sn.detach() + self.m, min=0.)
+            delta_p = 1 - self.m
+            delta_n = self.m
+            logit_p = - ap * (sp - delta_p) * self.gamma
+            logit_n = an * (sn - delta_n) * self.gamma
+            loss = self.soft_plus(torch.logsumexp(logit_n, dim=0) + torch.logsumexp(logit_p, dim=0))
+            return loss
+	</pre>
+</details>
+
+<details>
+  <summary>Triplet Loss（人脸识别、对比学习）</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> 回归问题损失函数，用于人脸识别，学习人脸的embedding, 相似的人脸对应的embedding在特征空间内相近，以此距离作人脸识别
   <h2>2. 表达式</h2>
@@ -162,7 +228,7 @@ def huber(true, pred, delta):
 </details>
 
 <details>
-  <summary>Contrastive Loss</summary>
+  <summary>Contrastive Loss(对比学习)</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> 对比学习的损失函数，使近似样本之间的距离越小越好。不近似样本之间的距离如果小于m，则通过互斥使其距离接近m。
   <h2>2. 表达式</h2>
@@ -183,7 +249,7 @@ def huber(true, pred, delta):
 </details>
   
 <details>
-  <summary>Quadruplet loss</summary>
+  <summary>Quadruplet loss(对比学习)</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> 对比学习的损失函数，一部分就是正常的triplet loss，这部分loss能够让模型区分出正样本对和负样本对之间的相对距离。另一部分是正样本对和其他任意负样本对之前的相对距离。这一部分约束可以理解成最小的类间距离都要大于类内距离。
   <h2>2. 表达式</h2>
@@ -207,23 +273,9 @@ def huber(true, pred, delta):
     diff = 2*furthest_positive - closest_negative-different_negative
     return tf.maximum(diff + TL_MARGIN, 0.0)
 </details>
-
+	
 <details>
-  <summary>KL散度</summary>
-  <h2>1. 损失函数介绍</h2>
-    <br /> 相对熵，又被称为KL散度或信息散度，是两个概率分布间差异的非对称性度量 。在信息论中，相对熵等价于两个概率分布的信息熵的差值，若其中一个概率分布为真实分布，另一个为理论（拟合）分布，则此时相对熵等于交叉熵与真实分布的信息熵之差，表示使用理论分布拟合真实分布时产生的信息损耗 。
-  <h2>2. 表达式</h2>
-    <br />KL散度定义如下（注意：p*log（p）-p*log(q)=p*log（p/q)，前者更利于推导的理解，后者实现起来更方便）:
-    <br /><img src = "figures/KL.png" width = "50%">
-  <h2>3. 代码实现</h2>
-    <br />KL散度的Python代码
-    <pre>
-  def KL(P,Q):
-    return sum(P * log(P / Q))
-</details>
-  
-<details>
-  <summary>Siamese network</summary>
+  <summary>Siamese network（对比学习）</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> 孪生神经网络用来衡量两个输入的相似程度。孪生神经网络有两个输入（Input1 and Input2）,将两个输入feed进入两个神经网络（Network1 and Network2），这两个神经网络分别将输入映射到新的空间，形成输入在新的空间中的表示。通过Loss的计算，评价两个输入的相似度。
   <h2>2. 形式</h2>
@@ -236,7 +288,7 @@ def huber(true, pred, delta):
 </details>
 
 <details>
-  <summary>distribution ranking</summary>
+  <summary>distribution ranking（目标检测）</summary>
   <h2>1. 损失函数介绍</h2>
     <br /> 这是目标检测领域内提出的loss。在单阶段目标检测任务中存在两个问题，首先，类别之间的候选数量不均衡。如果没有区域提出(region proposal)阶段，背景候选的数量很容易超过前景候选的数量。第二，背景候选的分布不平衡。它们中的大多数可以很容易地与前景对象分开，而只有少数很难区分。考虑到背景候选的不平衡，引入distributional ranking (DR)损失，将前景的约束分布排序在背景候选人的约束分布之上。通过对候选项进行重新加权，得到对应于最坏情况下损失的分布，损失可以集中在前景和背景分布之间的决策边界上。
   <h2>2. 表达式</h2>
@@ -274,98 +326,9 @@ class SigmoidDRLoss(nn.Module):
             loss = self.tau*torch.log(1.+torch.exp(self.L*(neg_dist - 1. + self.margin)))/self.L
         return loss
 </details>
-  
+ 
 <details>
-  <summary>Temporal difference</summary>
-  <h2>1. 介绍</h2>
-    <br /> Temporal difference是强化学习中的一种方法。
-    <br /> 时间差分是强化学习中最核心也最新奇的想法。它混合了动态规划和蒙特卡洛。和蒙特卡洛类似，时间差分方法从历史经验中去学习，利用了采样的思想；和动态规划类似，使用贝尔曼方程，使用后继状态的值函数更新当前状态的值函数。
-  <h2>2. 算法流程</h2>
-    <br /><img src = "figures/T D.png" width = "100%">
-</details>
-
-<details>
-  <summary>DAMSM</summary>
-    <br /><img src = "figures/DAMSM.png" width = "100%">
-</details>
-  
-<details>
-  <summary>OIM</summary>
-    <br /><img src = "figures/OIM.png" width = "100%">
-</details>
-
-
-<details>
-  <summary>r precision</summary>
-    <br /><img src = "figures/r_precision.png" width = "100%">
-</details>
-  
-<details>
-  <summary>Perceptual Loss</summary>
-  <h2>1. 损失函数介绍</h2>
-    <br /> 超分辨率问题中的损失函数，也被称为感知损失函数。传统的超分工作中通常采用像素级的误差损失，却没有捕获到预测结果和Ground truth之间的感知区别。而感知损失则提供了一种建立在像素级别以上的对图像更高级语义信息的比较。
-  <h2>2. 表达式</h2>
-    <br />Perceptual Loss 定义如下:
-    <br /><img src = "figures/Perceptual loss.png" width = "100%">
-</details>
-  
-<details>
-  <summary>Wasserstein Distance</summary>
-  <h2>1. 损失函数介绍</h2>
-    <br /> 传统的GAN loss中（JS散度和KL散度）存在很多问题，导致GAN的训练十分困难，主要表现为：模式坍塌（生成样本多样性不足）、不稳定（难以收敛）。很多研究都对GAN训练的困难性进行了探讨，最关键的问题在于，采用KL散度和JS散度作为两个概率的差异的衡量，如果两个概率的支撑集不重叠，就无法让那个参数化的、可移动的概率分布慢慢靠近以拟合目标分布。因此，研究者提出Wasserstein GAN，即WGAN，采用一种新的Loss定义，即Wasserstein Distance，作为两个概率分布的距离衡量指标。
-  <h2>2. 表达式</h2>
-    <br />Wasserstein Distance定义如下:
-    <br /><img src = "figures/Wasserstein Distance.PNG" width = "50%">
-</details>
-  
-<details>
-  <summary>SSIM Loss</summary>
-  <h2>1. 损失函数介绍</h2>
-    <br /> 当对一幅图片进行有损压缩，或者一幅图片有了噪声、畸变（distortion）等。我们人可以分辨出这两幅图大概率还是同一幅图，但如何有效地衡量他们的相似性呢？传统的L2距离（Mean Square Error,MSE）和L1距离无法衡量图片的结构相似性，因此需要新的度量标准弥补这一缺陷。
-  
-  研究发现，人眼对光照不敏感，但对局部（图像不同部分）光照的变化敏感；对灰度不敏感，但对各部分灰度的相对变化程度（对比度变化）敏感；并且对整体的结构敏感。基于以上先验信息，研究者提出了SSIM这种structure similarity的方法来做最后变化后的图片与变化前的结构相似性。
-  <h2>2. 表达式</h2>
-    <br />SSIM Loss定义如下:
-    <br /><img src = "figures/SSIM Loss.PNG" width = "50%">
-</details>
-  
-<details>
-  <summary>FID</summary>
-  <h2>1. 损失函数介绍</h2>
-    <br /> FID (Frechet Inception Distance score)是计算真实图像和生成图像的特征向量之间距离的一种度量。FID 从原始图像的计算机视觉特征的统计方面的相似度来衡量两组图像的相似度，这种视觉特征是使用 Inception v3 图像分类模型计算的得到的。分数越低代表两组图像越相似，或者说二者的统计量越相似，FID 在最佳情况下的得分为 0.0，表示两组图像相同。FID 分数被用于评估由生成性对抗网络生成的图像的质量，较低的分数与较高质量的图像有很高的相关性。
-  <h2>2. 表达式</h2>
-    <br />FID定义如下:
-    <br /><img src = "figures/FID.PNG" width = "80%">
-</details>
-  
-<details>
-  <summary>Inception</summary>
-  <h2>1. 损失函数介绍</h2>
-    <br /> 评价一个生成模型，我们需要考验它两方面性能：1. 生成的图片是否清晰；2. 生成的图片是否多样。生成的图片不够清晰，显然说明生成模型表现欠佳；生成的图片足够清晰，我们还要看是不是能生成足够多样的图片，有些生成模型只能生成有限的几种清晰图片，陷入了所谓 mode collapse，也并不能看作是好的模型。而Inception Score正是这样一种衡量清晰度和多样性的度量指标。更直观而言，对于单一的生成图像，Inception输出的概率分布熵值应该尽量小，因为越小说明生成图像越有可能属于某个类别，代表图像质量高；对于生成器生成的一批图像而言，Inception输出的平均概率分布熵值应该尽量大。因为生成器应该保证生成图像的多样性。
-  <h2>2. 表达式</h2>
-    <br />Wasserstein Distance定义如下:
-    <br /><img src = "figures/Inception.PNG" width = "50%">
-</details>
-  
-<details>
-  <summary>Dice loss</summary>
-  <h2>1. 损失函数介绍</h2>
-    <br />Dice系数是一种集合相似度度量，是语义分割任务的评价指标之一。
-    <br />Dice loss用于分割任务，是一种基于区域的损失函数，直接优化Dice系数，同时可以减少类别不平衡问题的影响。
-  <h2>2. 表达式</h2>
-    <br /><img src = "figures/dice_loss.png" width = "25%">
-  <h2>3. 代码实现</h2>
-    <pre>
-    def dice_loss(pred, target):
-        # shape of pred and target: NxCxHxW
-        intersection = (pred * target).sum(dim=(2, 3))
-        loss = (2. * intersection + 1.) / (pred.sum(dim=(2, 3)) + target.sum(dim=(2, 3)) + 1.)
-        return 1 - loss.mean()
-	</pre>
-</details>
-
-<details>
-  <summary>IoU loss</summary>
+  <summary>IoU loss（目标检测）</summary>
   <h2>1. 损失函数介绍</h2>
     <br />IoU loss用于目标检测任务的边界框回归分支。
     <br />IoU loss直接优化预测边界框与真实边界框之间的交并比，与分别优化边界框的坐标不同，IoU loss考虑了不同坐标之间的相互关系，也可以降低损失对目标尺寸的敏感性。
@@ -388,7 +351,48 @@ class SigmoidDRLoss(nn.Module):
 </details>
 
 <details>
-  <summary>Reconstruction loss</summary>
+  <summary>Temporal difference（强化学习）</summary>
+  <h2>1. 介绍</h2>
+    <br /> Temporal difference是强化学习中的一种方法。
+    <br /> 时间差分是强化学习中最核心也最新奇的想法。它混合了动态规划和蒙特卡洛。和蒙特卡洛类似，时间差分方法从历史经验中去学习，利用了采样的思想；和动态规划类似，使用贝尔曼方程，使用后继状态的值函数更新当前状态的值函数。
+  <h2>2. 算法流程</h2>
+    <br /><img src = "figures/T D.png" width = "100%">
+</details>
+  
+<details>
+  <summary>Perceptual Loss（超分辨率）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 超分辨率问题中的损失函数，也被称为感知损失函数。传统的超分工作中通常采用像素级的误差损失，却没有捕获到预测结果和Ground truth之间的感知区别。而感知损失则提供了一种建立在像素级别以上的对图像更高级语义信息的比较。
+  <h2>2. 表达式</h2>
+    <br />Perceptual Loss 定义如下:
+    <br /><img src = "figures/Perceptual loss.png" width = "100%">
+</details>
+ 
+<details>
+  <summary>DAMSM（GAN）</summary>
+    <br /><img src = "figures/DAMSM.png" width = "100%">
+</details>
+  
+<details>
+  <summary>Wasserstein Distance（GAN）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 传统的GAN loss中（JS散度和KL散度）存在很多问题，导致GAN的训练十分困难，主要表现为：模式坍塌（生成样本多样性不足）、不稳定（难以收敛）。很多研究都对GAN训练的困难性进行了探讨，最关键的问题在于，采用KL散度和JS散度作为两个概率的差异的衡量，如果两个概率的支撑集不重叠，就无法让那个参数化的、可移动的概率分布慢慢靠近以拟合目标分布。因此，研究者提出Wasserstein GAN，即WGAN，采用一种新的Loss定义，即Wasserstein Distance，作为两个概率分布的距离衡量指标。
+  <h2>2. 表达式</h2>
+    <br />Wasserstein Distance定义如下:
+    <br /><img src = "figures/Wasserstein Distance.PNG" width = "50%">
+</details>
+ 
+<details>
+  <summary>FID（GAN）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> FID (Frechet Inception Distance score)是计算真实图像和生成图像的特征向量之间距离的一种度量。FID 从原始图像的计算机视觉特征的统计方面的相似度来衡量两组图像的相似度，这种视觉特征是使用 Inception v3 图像分类模型计算的得到的。分数越低代表两组图像越相似，或者说二者的统计量越相似，FID 在最佳情况下的得分为 0.0，表示两组图像相同。FID 分数被用于评估由生成性对抗网络生成的图像的质量，较低的分数与较高质量的图像有很高的相关性。
+  <h2>2. 表达式</h2>
+    <br />FID定义如下:
+    <br /><img src = "figures/FID.PNG" width = "80%">
+</details>
+
+<details>
+  <summary>Reconstruction loss（GAN）</summary>
   <h2>1. 损失函数介绍</h2>
     <br />faceswap-GAN中构建了一个编码器和两个解码器，训练时使用Reconstruction loss，使源人脸和目标人脸通过对应的编码器和解码器后能够重建，以此训练编码器和解码器。Reconstruction loss使用L1 loss。
   <h2>2. 表达式</h2>
@@ -396,62 +400,58 @@ class SigmoidDRLoss(nn.Module):
 </details>
 
 <details>
-  <summary>Center loss</summary>
+  <summary>Inception（GAN）</summary>
   <h2>1. 损失函数介绍</h2>
-    <br />Center loss用于人脸识别，与softmax cross entropy loss一起使用。Center loss同时学习每个类的特征中心，并惩罚人脸特征与其对应的中心之间的距离。
-    <br />Center loss可以尽可能增大类间距离和类内紧凑性，对于人脸识别非常重要。
+    <br /> 评价一个生成模型，我们需要考验它两方面性能：1. 生成的图片是否清晰；2. 生成的图片是否多样。生成的图片不够清晰，显然说明生成模型表现欠佳；生成的图片足够清晰，我们还要看是不是能生成足够多样的图片，有些生成模型只能生成有限的几种清晰图片，陷入了所谓 mode collapse，也并不能看作是好的模型。而Inception Score正是这样一种衡量清晰度和多样性的度量指标。更直观而言，对于单一的生成图像，Inception输出的概率分布熵值应该尽量小，因为越小说明生成图像越有可能属于某个类别，代表图像质量高；对于生成器生成的一批图像而言，Inception输出的平均概率分布熵值应该尽量大。因为生成器应该保证生成图像的多样性。
   <h2>2. 表达式</h2>
-    <br /><img src = "figures/center_loss_1.png" width = "25%">
-    <br />类别中心在每个mini-batch中的更新量为
-    <br /><img src = "figures/center_loss_2.png" width = "25%">
+    <br />Wasserstein Distance定义如下:
+    <br /><img src = "figures/Inception.PNG" width = "50%">
+</details>
+  
+<details>
+  <summary>SSIM Loss（图像重建、压缩）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br /> 当对一幅图片进行有损压缩，或者一幅图片有了噪声、畸变（distortion）等。我们人可以分辨出这两幅图大概率还是同一幅图，但如何有效地衡量他们的相似性呢？传统的L2距离（Mean Square Error,MSE）和L1距离无法衡量图片的结构相似性，因此需要新的度量标准弥补这一缺陷。
+  
+  研究发现，人眼对光照不敏感，但对局部（图像不同部分）光照的变化敏感；对灰度不敏感，但对各部分灰度的相对变化程度（对比度变化）敏感；并且对整体的结构敏感。基于以上先验信息，研究者提出了SSIM这种structure similarity的方法来做最后变化后的图片与变化前的结构相似性。
+  <h2>2. 表达式</h2>
+    <br />SSIM Loss定义如下:
+    <br /><img src = "figures/SSIM Loss.PNG" width = "50%">
+</details>
+ 
+<details>
+  <summary>Dice loss（语义分割）</summary>
+  <h2>1. 损失函数介绍</h2>
+    <br />Dice系数是一种集合相似度度量，是语义分割任务的评价指标之一。
+    <br />Dice loss用于分割任务，是一种基于区域的损失函数，直接优化Dice系数，同时可以减少类别不平衡问题的影响。
+  <h2>2. 表达式</h2>
+    <br /><img src = "figures/dice_loss.png" width = "25%">
   <h2>3. 代码实现</h2>
     <pre>
-    class CenterLoss(nn.Module):
-        def __init__(self, num_classes, feat_dim):
-            super(CenterLoss, self).__init__()
-            self.num_classes = num_classes
-            self.feat_dim = feat_dim
-            self.centers = nn.Parameter(torch.randn(self.num_classes, self.feat_dim))
-    
-        def forward(self, x, labels):
-            batch_size = x.size(0)
-            distmat = torch.pow(x, 2).sum(dim=1, keepdim=True).expand(batch_size, self.num_classes) + \
-                      torch.pow(self.centers, 2).sum(dim=1, keepdim=True).expand(self.num_classes, batch_size).t()
-            distmat.addmm_(1, -2, x, self.centers.t())
-            classes = torch.arange(self.num_classes).long()
-            labels = labels.unsqueeze(1).expand(batch_size, self.num_classes)
-            mask = labels.eq(classes.expand(batch_size, self.num_classes))
-            dist = distmat * mask.float()
-            loss = dist.sum() / batch_size
-            return loss
+    def dice_loss(pred, target):
+        # shape of pred and target: NxCxHxW
+        intersection = (pred * target).sum(dim=(2, 3))
+        loss = (2. * intersection + 1.) / (pred.sum(dim=(2, 3)) + target.sum(dim=(2, 3)) + 1.)
+        return 1 - loss.mean()
 	</pre>
 </details>
 
 <details>
-  <summary>Circle loss</summary>
+  <summary>KL散度</summary>
   <h2>1. 损失函数介绍</h2>
-    <br />Circle loss可以用于依赖特征学习的任务（人脸识别、行人重识别、细粒度图像检索等）。
-    <br />深度特征学习有两种基本范式，分别是使用类标签和使用正负样本对标签进行学习。这两种学习方法之间并无本质区别，其目标都是最大化类内相似度（s_p）和最小化类间相似度（s_n），很多常用的损失函数都会将s_n和s_p组合成相似度对来优化，并试图减小s_n-s_p。
-    <br />Circle loss旨在最大化类内相似度，最小化类间相似度：把所有的s_p和s_n两两配对，并减小在所有的相似性对上二者的差值，并通过两个线性因子控制对相似度的惩罚程度，实现更灵活的优化途径和更明确的优化目标。
-    <h2>2. 表达式</h2>
-    <br /><img src = "figures/circle_loss.png" width = "50%">
+    <br /> 相对熵，又被称为KL散度或信息散度，是两个概率分布间差异的非对称性度量 。在信息论中，相对熵等价于两个概率分布的信息熵的差值，若其中一个概率分布为真实分布，另一个为理论（拟合）分布，则此时相对熵等于交叉熵与真实分布的信息熵之差，表示使用理论分布拟合真实分布时产生的信息损耗 。
+  <h2>2. 表达式</h2>
+    <br />KL散度定义如下（注意：p*log（p）-p*log(q)=p*log（p/q)，前者更利于推导的理解，后者实现起来更方便）:
+    <br /><img src = "figures/KL.png" width = "50%">
   <h2>3. 代码实现</h2>
+    <br />KL散度的Python代码
     <pre>
-    class CircleLoss(nn.Module):
-        def __init__(self, m, gamma):
-            super(CircleLoss, self).__init__()
-            self.m = m
-            self.gamma = gamma
-            self.soft_plus = nn.Softplus()
-    
-        def forward(self, sp, sn):
-            ap = torch.clamp_min(- sp.detach() + 1 + self.m, min=0.)
-            an = torch.clamp_min(sn.detach() + self.m, min=0.)
-            delta_p = 1 - self.m
-            delta_n = self.m
-            logit_p = - ap * (sp - delta_p) * self.gamma
-            logit_n = an * (sn - delta_n) * self.gamma
-            loss = self.soft_plus(torch.logsumexp(logit_n, dim=0) + torch.logsumexp(logit_p, dim=0))
-            return loss
-	</pre>
+  def KL(P,Q):
+    return sum(P * log(P / Q))
 </details>
+	
+<details>
+  <summary>r precision</summary>
+    <br /><img src = "figures/r_precision.png" width = "100%">
+</details>
+	
